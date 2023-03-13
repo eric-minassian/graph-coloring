@@ -107,9 +107,11 @@ void InterferenceGraph<T>::addEdge(const T &v, const T &w) {
     throw UnknownVertexException(w);
   }
 
-  vertex_1->second.insert(w);
-  vertex_2->second.insert(v);
-  num_edges++;
+  if (vertex_1->second.find(w) == vertex_1->second.end() && v != w) {
+    vertex_1->second.insert(w);
+    vertex_2->second.insert(v);
+    num_edges++;
+  }
 }
 
 template <typename T>

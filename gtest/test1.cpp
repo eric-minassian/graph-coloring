@@ -112,6 +112,7 @@ TEST(AdditionalPart1, AddEdge1) {
   graph.addEdge("hello", "world");
   graph.addEdge("hello", "class");
   graph.addEdge("world", "class");
+  graph.addEdge("world", "class");
 
   std::unordered_set<std::string> edges_4 = graph.neighbors("hello");
   std::unordered_set<std::string> edges_5 = graph.neighbors("world");
@@ -298,8 +299,37 @@ TEST(AdditionalPart1, Vertices) {
   }
 }
 
-// @ TODO : Add tests
-TEST(AdditionalPart1, Neighbors) {}
+TEST(AdditionalPart1, Neighbors) {
+  InterferenceGraph<std::string> graph;
+
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+  graph.addEdge("hello", "world");
+  graph.addEdge("hello", "class");
+  graph.addEdge("world", "class");
+
+  std::unordered_set<std::string> e_edges_1 = {"world", "class"},
+                                  e_edges_2 = {"hello", "class"},
+                                  e_edges_3 = {"hello", "world"};
+
+  auto edges_1 = graph.neighbors("hello"), edges_2 = graph.neighbors("world"),
+       edges_3 = graph.neighbors("class");
+
+  EXPECT_EQ(e_edges_1.size(), edges_1.size());
+  EXPECT_EQ(e_edges_2.size(), edges_2.size());
+  EXPECT_EQ(e_edges_3.size(), edges_3.size());
+
+  for (auto v : e_edges_1) {
+    EXPECT_NE(edges_1.find(v), edges_1.end());
+  }
+  for (auto v : e_edges_2) {
+    EXPECT_NE(edges_2.find(v), edges_2.end());
+  }
+  for (auto v : e_edges_3) {
+    EXPECT_NE(edges_3.find(v), edges_3.end());
+  }
+}
 
 TEST(AdditionalPart1, NumVertices) {
   InterferenceGraph<std::string> graph;
@@ -334,9 +364,91 @@ TEST(AdditionalPart1, NumVertices) {
 }
 
 // @ TODO : Add tests
-TEST(AdditionalPart1, NumEdges) {}
+TEST(AdditionalPart1, NumEdges) {
+  InterferenceGraph<std::string> graph;
 
-TEST(AdditionalPart1, Interferences) {}
+  EXPECT_EQ(graph.numEdges(), 0);
 
-TEST(AdditionalPart1, Degree) {}
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+  graph.addVertex("test");
+  graph.addEdge("hello", "world");
+  graph.addEdge("hello", "class");
+  graph.addEdge("world", "class");
+
+  EXPECT_EQ(graph.numEdges(), 3);
+
+  graph.addEdge("world", "class");
+
+  EXPECT_EQ(graph.numEdges(), 3);
+
+  graph.addEdge("test", "world");
+
+  EXPECT_EQ(graph.numEdges(), 4);
+
+  graph.removeEdge("test", "world");
+
+  EXPECT_EQ(graph.numEdges(), 3);
+}
+
+TEST(AdditionalPart1, InterferencesException) {
+  InterferenceGraph<std::string> graph;
+
+  EXPECT_THROW(graph.interferes("hello", "world"), UnknownVertexException);
+
+  graph.addVertex("hello");
+
+  EXPECT_THROW(graph.interferes("hello", "world"), UnknownVertexException);
+  EXPECT_THROW(graph.interferes("world", "hello"), UnknownVertexException);
+}
+
+TEST(AdditionalPart1, Interference) {
+  InterferenceGraph<std::string> graph;
+
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+  graph.addEdge("hello", "world");
+  graph.addEdge("world", "class");
+
+  EXPECT_TRUE(graph.interferes("hello", "world"));
+  EXPECT_TRUE(graph.interferes("world", "hello"));
+  EXPECT_TRUE(graph.interferes("class", "world"));
+  EXPECT_TRUE(graph.interferes("world", "class"));
+
+  EXPECT_FALSE(graph.interferes("class", "hello"));
+  EXPECT_FALSE(graph.interferes("hello", "class"));
+}
+
+TEST(AdditionalPart1, DegreeException) {
+  InterferenceGraph<std::string> graph;
+
+  EXPECT_THROW(graph.degree("hello"), UnknownVertexException);
+
+  graph.addVertex("hello");
+
+  EXPECT_THROW(graph.degree("test"), UnknownVertexException);
+}
+
+TEST(AdditionalPart1, Degree) {
+  InterferenceGraph<std::string> graph;
+
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+  graph.addEdge("hello", "world");
+  graph.addEdge("world", "class");
+
+  EXPECT_EQ(graph.degree("hello"), 1);
+  EXPECT_EQ(graph.degree("world"), 2);
+  EXPECT_EQ(graph.degree("class"), 1);
+
+  graph.addEdge("hello", "class");
+
+  EXPECT_EQ(graph.degree("hello"), 2);
+  EXPECT_EQ(graph.degree("world"), 2);
+  EXPECT_EQ(graph.degree("class"), 2);
+}
+
 } // end namespace
