@@ -148,6 +148,13 @@ template <typename T> void InterferenceGraph<T>::removeVertex(const T &vertex) {
   if (graph.find(vertex) == graph.end()) {
     throw UnknownVertexException(vertex);
   } else {
+    auto vertex_node = graph.find(vertex);
+
+    for (auto v : vertex_node->second) {
+      auto temp_vertex = graph.find(v);
+      temp_vertex->second.erase(vertex);
+    }
+
     graph.erase(vertex);
     vertices_set.erase(vertex);
   }
