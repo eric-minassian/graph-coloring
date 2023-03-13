@@ -1,9 +1,12 @@
+#include "../app/InterferenceGraph.hpp"
 #include "CSVReader.hpp"
 #include "IGWriter.hpp"
 #include "InterferenceGraph.hpp"
 #include "proj6.hpp"
 #include "verifier.hpp"
 #include "gtest/gtest.h"
+#include <string>
+#include <unordered_set>
 
 // Warning: These are *NOT* exhaustive tests.
 // You should consider creating your own unit tests
@@ -58,4 +61,282 @@ TEST(RequiredPart2, SimpleFail) {
   EXPECT_TRUE(allocation.empty());
 }
 
+TEST(AdditionalPart1, AddVertex1300) {
+  InterferenceGraph<std::string> graph;
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      for (char e = 'a'; e <= 'b'; e++) {
+        std::string temp = "";
+        temp += c;
+        temp += d;
+        temp += e;
+        graph.addVertex(temp);
+      }
+    }
+  }
+}
+
+TEST(AdditionalPart1, AddEdgeException) {
+  InterferenceGraph<std::string> graph;
+  EXPECT_THROW(graph.addEdge("hello", "world"), UnknownVertexException);
+
+  graph.addVertex("hello");
+
+  EXPECT_THROW(graph.addEdge("hello", "world"), UnknownVertexException);
+
+  graph.removeVertex("hello");
+  graph.addVertex("world");
+
+  EXPECT_THROW(graph.addEdge("hello", "world"), UnknownVertexException);
+
+  graph.addVertex("hello");
+
+  graph.addEdge("hello", "world");
+}
+
+TEST(AdditionalPart1, AddEdge1) {
+  InterferenceGraph<std::string> graph;
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+
+  std::unordered_set<std::string> edges_1 = graph.neighbors("hello");
+  std::unordered_set<std::string> edges_2 = graph.neighbors("world");
+  std::unordered_set<std::string> edges_3 = graph.neighbors("class");
+
+  EXPECT_EQ(edges_1.size(), 0);
+  EXPECT_EQ(edges_2.size(), 0);
+  EXPECT_EQ(edges_3.size(), 0);
+
+  graph.addEdge("hello", "world");
+  graph.addEdge("hello", "class");
+  graph.addEdge("world", "class");
+
+  std::unordered_set<std::string> edges_4 = graph.neighbors("hello");
+  std::unordered_set<std::string> edges_5 = graph.neighbors("world");
+  std::unordered_set<std::string> edges_6 = graph.neighbors("class");
+
+  EXPECT_EQ(edges_4.size(), 2);
+  EXPECT_EQ(edges_5.size(), 2);
+  EXPECT_EQ(edges_6.size(), 2);
+
+  EXPECT_NE(edges_4.find("world"), edges_4.end());
+  EXPECT_NE(edges_4.find("class"), edges_4.end());
+  EXPECT_NE(edges_5.find("class"), edges_5.end());
+  EXPECT_NE(edges_5.find("hello"), edges_5.end());
+  EXPECT_NE(edges_6.find("hello"), edges_6.end());
+  EXPECT_NE(edges_6.find("world"), edges_6.end());
+}
+
+TEST(AdditionalPart1, AddVertex) {
+  InterferenceGraph<std::string> graph;
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      std::string temp = "";
+      temp += c;
+      temp += d;
+      graph.addVertex(temp);
+    }
+  }
+
+  std::unordered_set<std::string> vertices = graph.vertices();
+
+  EXPECT_EQ(vertices.size(), 676);
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      std::string temp = "";
+      temp += c;
+      temp += d;
+      EXPECT_NE(vertices.find(temp), vertices.end());
+    }
+  }
+}
+
+TEST(AdditionalPart1, AddVertexDuplicate) {
+  InterferenceGraph<std::string> graph;
+
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addEdge("hello", "world");
+
+  graph.addVertex("hello");
+  graph.addVertex("world");
+
+  std::unordered_set<std::string> edges_1 = graph.neighbors("hello");
+  std::unordered_set<std::string> edges_2 = graph.neighbors("world");
+
+  EXPECT_EQ(edges_1.size(), 1);
+  EXPECT_NE(edges_1.find("world"), edges_1.end());
+
+  EXPECT_EQ(edges_2.size(), 1);
+  EXPECT_NE(edges_2.find("hello"), edges_2.end());
+}
+
+TEST(AdditionalPart1, RemoveVertex) {
+  InterferenceGraph<std::string> graph;
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      std::string temp = "";
+      temp += c;
+      temp += d;
+      graph.addVertex(temp);
+    }
+  }
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      std::string temp = "";
+      temp += c;
+      temp += d;
+      graph.removeVertex(temp);
+    }
+  }
+
+  std::unordered_set<std::string> vertices = graph.vertices();
+
+  EXPECT_EQ(vertices.size(), 0);
+}
+
+TEST(AdditionalPart1, RemoveEdgeVertexException) {
+  InterferenceGraph<std::string> graph;
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+
+  graph.addEdge("hello", "world");
+
+  EXPECT_THROW(graph.removeEdge("test", "work"), UnknownVertexException);
+  EXPECT_THROW(graph.removeEdge("hello", "test"), UnknownVertexException);
+  EXPECT_THROW(graph.removeEdge("test", "world"), UnknownVertexException);
+}
+
+TEST(AdditionalPart1, RemoveEdgeEdgeException) {
+  InterferenceGraph<std::string> graph;
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+
+  graph.addEdge("hello", "world");
+
+  EXPECT_THROW(graph.removeEdge("world", "class"), UnknownEdgeException);
+}
+
+TEST(AdditionalPart1, RemoveEdge) {
+  InterferenceGraph<std::string> graph;
+  graph.addVertex("hello");
+  graph.addVertex("world");
+  graph.addVertex("class");
+
+  graph.addEdge("hello", "world");
+
+  std::unordered_set<std::string> edges_1 = graph.neighbors("hello");
+  std::unordered_set<std::string> edges_2 = graph.neighbors("world");
+
+  EXPECT_EQ(edges_1.size(), 1);
+  EXPECT_NE(edges_1.find("world"), edges_1.end());
+
+  EXPECT_EQ(edges_2.size(), 1);
+  EXPECT_NE(edges_2.find("hello"), edges_2.end());
+
+  graph.removeEdge("hello", "world");
+
+  std::unordered_set<std::string> edges_3 = graph.neighbors("hello");
+  std::unordered_set<std::string> edges_4 = graph.neighbors("world");
+
+  EXPECT_EQ(edges_3.size(), 0);
+  EXPECT_EQ(edges_3.find("world"), edges_3.end());
+
+  EXPECT_EQ(edges_4.size(), 0);
+  EXPECT_EQ(edges_4.find("hello"), edges_4.end());
+}
+
+TEST(AdditionalPart1, Vertices) {
+  InterferenceGraph<std::string> graph;
+  std::unordered_set<std::string> expected_graph_vertices = {};
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      for (char e = 'a'; e <= 'b'; e++) {
+        std::string temp = "";
+        temp += c;
+        temp += d;
+        temp += e;
+        graph.addVertex(temp);
+        expected_graph_vertices.insert(temp);
+      }
+    }
+  }
+
+  std::unordered_set<std::string> graph_vertices = graph.vertices();
+
+  EXPECT_EQ(graph_vertices.size(), expected_graph_vertices.size());
+
+  for (auto v : expected_graph_vertices) {
+    EXPECT_NE(graph_vertices.find(v), graph_vertices.end());
+  }
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      std::string temp = "";
+      temp += c;
+      temp += d;
+      temp += 'a';
+      expected_graph_vertices.erase(temp);
+      graph.removeVertex(temp);
+    }
+  }
+
+  std::unordered_set<std::string> graph_vertices_2 = graph.vertices();
+
+  EXPECT_EQ(graph_vertices_2.size(), expected_graph_vertices.size());
+
+  for (auto v : expected_graph_vertices) {
+    EXPECT_NE(graph_vertices_2.find(v), graph_vertices_2.end());
+  }
+}
+
+// @ TODO : Add tests
+TEST(AdditionalPart1, Neighbors) {}
+
+TEST(AdditionalPart1, NumVertices) {
+  InterferenceGraph<std::string> graph;
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      for (char e = 'a'; e <= 'z'; e++) {
+        std::string temp = "";
+        temp += c;
+        temp += d;
+        temp += e;
+        graph.addVertex(temp);
+      }
+    }
+  }
+
+  EXPECT_EQ(graph.numVertices(), 17576);
+
+  for (char c = 'a'; c <= 'z'; c++) {
+    for (char d = 'a'; d <= 'z'; d++) {
+      for (char e = 'a'; e <= 'y'; e++) {
+        std::string temp = "";
+        temp += c;
+        temp += d;
+        temp += e;
+        graph.removeVertex(temp);
+      }
+    }
+  }
+
+  EXPECT_EQ(graph.numVertices(), 676);
+}
+
+// @ TODO : Add tests
+TEST(AdditionalPart1, NumEdges) {}
+
+TEST(AdditionalPart1, Interferences) {}
+
+TEST(AdditionalPart1, Degree) {}
 } // end namespace
