@@ -1,6 +1,7 @@
 #include "proj6.hpp"
 #include "CSVReader.hpp"
 #include "InterferenceGraph.hpp"
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -35,7 +36,20 @@ RegisterAssignment proj6::assignRegisters(const std::string &path_to_graph,
     i++;
   }
 
-  for (unsigned i = 1; i <= num_registers; i++) {
+  int max_registers = num_registers;
+  int max_degree = 0;
+  for (auto vertex : vertices) {
+    if (ig.degree(vertex) > max_degree) {
+      max_degree = ig.degree(vertex);
+    }
+  }
+
+  max_degree++;
+  if (max_registers > max_degree) {
+    max_registers = max_degree;
+  }
+
+  for (unsigned i = 1; i <= max_registers; i++) {
     std::string first_uncolored = vertices.front();
 
     ans.insert({first_uncolored, i});

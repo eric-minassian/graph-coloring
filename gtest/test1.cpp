@@ -504,4 +504,63 @@ TEST(AdditionalPart2, TimeRestriction) {
   EXPECT_TRUE(verifyAllocation(GRAPH, NUM_REGS, allocation));
 }
 
+TEST(AdditionalPart2, PubTests) {
+  // Load the graph pointed to by simple.csv
+  const auto &GRAPH = "gtest/graphs/pub_tests.csv";
+  const auto NUM_REGS = 5;
+
+  const auto &allocation = assignRegisters(GRAPH, NUM_REGS);
+  IGWriter::write(CSVReader::load(GRAPH), "gtest/graphs/pub_tests.dot",
+                  allocation);
+
+  EXPECT_TRUE(verifyAllocation(GRAPH, NUM_REGS, allocation));
+}
+
+TEST(AdditionalPart2, ThreeReg) {
+  // Load the graph pointed to by simple.csv
+  const auto &GRAPH = "gtest/graphs/three_reg.csv";
+  const auto NUM_REGS = 2;
+
+  const auto &allocation = assignRegisters(GRAPH, NUM_REGS);
+  IGWriter::write(CSVReader::load(GRAPH), "gtest/graphs/three_reg.dot",
+                  allocation);
+
+  EXPECT_TRUE(verifyAllocation(GRAPH, NUM_REGS, allocation));
+}
+
+TEST(AdditionalPart2, FullStressTestPass) {
+  // Load the graph pointed to by simple.csv
+  const auto &GRAPH = "gtest/graphs/full_stress_test.csv";
+  const auto NUM_REGS = 500;
+
+  const auto &allocation = assignRegisters(GRAPH, NUM_REGS);
+  IGWriter::write(CSVReader::load(GRAPH), "gtest/graphs/full_stress_test.dot",
+                  allocation);
+
+  EXPECT_TRUE(verifyAllocation(GRAPH, NUM_REGS, allocation));
+}
+
+TEST(AdditionalPart2, FullStressTestFail) {
+  // Load the graph pointed to by simple.csv
+  const auto &GRAPH = "gtest/graphs/full_stress_test.csv";
+  const auto NUM_REGS = 499;
+
+  const auto &allocation = assignRegisters(GRAPH, NUM_REGS);
+
+  EXPECT_EQ(allocation.size(), 0);
+  EXPECT_FALSE(verifyAllocation(GRAPH, NUM_REGS, allocation));
+}
+
+TEST(AdditionalPart2, Cycle6) {
+  // Load the graph pointed to by simple.csv
+  const auto &GRAPH = "gtest/graphs/cycle_6.csv";
+  const auto NUM_REGS = 2;
+
+  const auto &allocation = assignRegisters(GRAPH, NUM_REGS);
+  IGWriter::write(CSVReader::load(GRAPH), "gtest/graphs/cycle_6.dot",
+                  allocation);
+
+  EXPECT_TRUE(verifyAllocation(GRAPH, NUM_REGS, allocation));
+}
+
 } // end namespace
