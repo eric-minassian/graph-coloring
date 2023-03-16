@@ -20,9 +20,10 @@ def generate_random_graph(num_vertices : int) -> dict:
             vertices.add(vertex)
 
     for vertex in vertices:
-        num_edges = random.randint(0, num_vertices - 1)
-        edges = list(random.sample(vertices, num_edges))
-        
+        # num_edges = random.randint(0, num_vertices - 1)
+        # edges = list(random.sample(vertices, num_edges))
+        edges = vertices.copy()    
+
         try:
             edges.remove(vertex)
         except ValueError:

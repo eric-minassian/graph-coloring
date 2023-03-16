@@ -1,4 +1,3 @@
-#include "../app/InterferenceGraph.hpp"
 #include "CSVReader.hpp"
 #include "IGWriter.hpp"
 #include "InterferenceGraph.hpp"
@@ -498,8 +497,6 @@ TEST(AdditionalPart2, TimeRestriction) {
   const auto NUM_REGS = 1000;
 
   const auto &allocation = assignRegisters(GRAPH, NUM_REGS);
-  IGWriter::write(CSVReader::load(GRAPH), "gtest/graphs/auto_generated.dot",
-                  allocation);
 
   EXPECT_TRUE(verifyAllocation(GRAPH, NUM_REGS, allocation));
 }
